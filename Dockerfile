@@ -11,7 +11,9 @@ RUN apt-get update && apt-get install -y \
 
 RUN git clone https://github.com/Witchaz/Monsoonsim_tools.git .
 
-RUN pip3 install -r requirements.txt
+RUN for pkg in $(cat requirements.txt); do \
+    pip install "$pkg" || true; \
+    done
 
 EXPOSE 8501
 

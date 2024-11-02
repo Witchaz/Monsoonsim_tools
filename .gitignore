@@ -7,7 +7,7 @@ setup.ipynb
 pyvenv.cfg
 Scripts
 share
-
+etc
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
