@@ -9,6 +9,7 @@ RUN for pkg in $(cat requirements.txt); do \
     pip install "$pkg" || true; \
     done
 
+RUN pip install streamlit
 # Copy app code and set working directory
 COPY . .
 WORKDIR /app
