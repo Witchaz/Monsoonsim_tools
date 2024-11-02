@@ -1,6 +1,14 @@
 #by me
 env
 csv
+
+#venv
+setup.ipynb
+pyvenv.cfg
+Scripts
+share
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
