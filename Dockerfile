@@ -12,9 +12,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN git clone https://github.com/Witchaz/Monsoonsim_tools.git .
 
-RUN for pkg in $(cat requirements.txt); do \
-    pip install "$pkg" || true; \
-    done
+RUN pip install -r requirements.txt
 
 RUN pip install streamlit
 EXPOSE 8501
