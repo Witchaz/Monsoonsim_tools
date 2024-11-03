@@ -15,7 +15,7 @@ def cal():
         return
     
 
-    df = pd.read_csv("MARKETING-Survey.csv")
+    df = pd.read_csv(file)
     df.columns = df.columns.str.strip()
     
 
