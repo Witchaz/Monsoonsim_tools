@@ -29,8 +29,8 @@ def cal():
     st.dataframe(df,hide_index=True)
 
 st.set_page_config(
-    page_title="Main",
-    page_icon="🤖",
+    page_title="Marketing survey summarizer",
+    page_icon="🗎",
 )
 st.sidebar.header("Marketing survey summarizer")
 st.sidebar.markdown("เว็บที่จะช่วยสรุปข้อมูลใน Marketing survey ให้คุณ โดยในนี้จะใช้ระบบ 100 samples ถ้าใช้เป็นตัวอื่นค่าที่จะช่วยไฮไลต์อาจจะเพี้ยน")
