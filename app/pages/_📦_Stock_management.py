@@ -4,38 +4,26 @@ import pandas as pd
 import seaborn as sns
 import math
 
-st.set_page_config(
-    page_title="Stock management",
-    page_icon="📦",
-)
-
 def fade_color(color, alpha=0.3):
     r, g, b = color
     faded_color = [(1 - alpha) * r + alpha, (1 - alpha) * g + alpha, (1 - alpha) * b + alpha]
     return matplotlib.colors.to_hex(faded_color)
 
-# ฟังก์ชันสำหรับการ highlight ของ B2C
-def b2c_highlight_by_city(row):
-    city = row.name[0]
-    color = b2c_city_colors.get(city, "#ffffff")
-    faded_color = fade_color(color, alpha=0.3)
-    return [f'background-color: {faded_color}'] * len(row)
 
-# ฟังก์ชันสำหรับการ highlight ของ B2B
-def b2b_highlight_by_product(row):
-    product = row.name
-    color = b2b_product_colors.get(product, "#ffffff")
-    faded_color = fade_color(color, alpha=0.3)
-    return [f'background-color: {faded_color}'] * len(row)
+def b2c_handle(b2c_file):
+    def b2c_highlight_by_city(row):
+        city = row.name[0]
+        color = b2c_city_colors.get(city, "#ffffff")
+        faded_color = fade_color(color, alpha=0.3)
+        return [f'background-color: {faded_color}'] * len(row)
 
-# B2C Processing
-b2c_file = st.file_uploader("B2C forecast", type="csv")
-if b2c_file:
+
     b2c_df = pd.read_csv(b2c_file)
     try:
         b2c_df = b2c_df.drop(columns=["Category"])
     except Exception as e:
-        st.error("Error : Data is wrong format.")        
+        st.error("Error : Data is wrong format.")
+        return     
     new_columns = pd.MultiIndex.from_tuples(
         [col.split('-', 1) for col in b2c_df.columns], names=["City", "Product"]
     )
@@ -43,7 +31,7 @@ if b2c_file:
     b2c_city_options = new_columns.get_level_values(0).drop_duplicates(keep='first')
     b2c_options = st.multiselect("Please select city", b2c_city_options, default=b2c_city_options[0])
 
-    b2c_is_high_demand = st.radio("High demand?",["Yes","No"],key="b2c_is_high_demand")
+    st.radio("High demand?",["Yes","No"],key="b2c_is_high_demand")
 
     try:
         b2c_result = b2c_df[b2c_options].agg(['mean', 'std'])
@@ -86,16 +74,23 @@ if b2c_file:
     except Exception as e:
         st.error("Error: Please select at least one city.")
         print(e)
+        return
 
-# B2B Processing
-b2b_file = st.file_uploader("B2B forecast", type="csv")
-if b2b_file:
+def b2b_handle(b2b_file):
+    def b2b_highlight_by_product(row):
+        product = row.name
+        color = b2b_product_colors.get(product, "#ffffff")
+        faded_color = fade_color(color, alpha=0.3)
+        return [f'background-color: {faded_color}'] * len(row)
+
+
     b2b_df = pd.read_csv(b2b_file)
     try:
         b2b_df.drop(columns=["Day"], inplace=True)
     except Exception as e:
         st.error("Error : Data is wrong format.")
         print(e)
+        return
     b2b_result = b2b_df.agg(['mean', 'std'])
     b2b_result_t = b2b_result.T
     b2b_result_t = b2b_result_t.astype({'mean': 'int64', 'std': 'int64'})
@@ -138,3 +133,23 @@ if b2b_file:
     
     b2b_result_t = b2b_result_t.style.apply(b2b_highlight_by_product, axis=1)
     st.dataframe(b2b_result_t, use_container_width=True)
+
+
+st.set_page_config(
+    page_title="Stock management",
+    page_icon="📦",
+)
+st.sidebar.header("Stock management")
+st.sidebar.markdown("ช่วยคำนวณ Safety stock ทั้งในรูปแบบ Simple และ King's method นอกจากนี้ยังช่วยคำนวณ Reorder point ให้อีกด้วย")
+
+
+# B2C Processing
+b2c_file = st.file_uploader("B2C forecast", type="csv")
+if b2c_file:
+    b2c_handle(b2c_file)
+
+
+# B2B Processing
+b2b_file = st.file_uploader("B2B forecast", type="csv")
+if b2b_file:
+    b2b_handle(b2b_file)

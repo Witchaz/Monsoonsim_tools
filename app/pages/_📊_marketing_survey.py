@@ -25,6 +25,7 @@ def cal():
     except Exception as e:
         st.error("Error : Data is wrong format.")
         print(e)
+        return
     df = df.groupby(['Age Group','Product Preference'])['Media Preference'].value_counts().unstack(fill_value=0)
     df.reset_index(inplace=True)
     df = df.style.background_gradient(cmap="RdPu", subset=['Media A', 'Media B', 'Media C'])
