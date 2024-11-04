@@ -40,6 +40,8 @@ if b2c_file:
     b2c_city_options = new_columns.get_level_values(0).drop_duplicates(keep='first')
     b2c_options = st.multiselect("Please select city", b2c_city_options, default=b2c_city_options[0])
 
+    b2c_is_high_demand = st.radio("High demand?",["Yes","No"],key="b2c_is_high_demand")
+
     try:
         b2c_result = b2c_df[b2c_options].agg(['mean', 'std'])
         b2c_result_t = b2c_result.T
@@ -59,9 +61,13 @@ if b2c_file:
                 avg_sale = b2c_result_t.loc[(i, j), 'mean']
                 std_dev_demand = b2c_result_t.loc[(i, j), 'std']
                 
-                safety_stock = b2c_Z * math.sqrt(
-                    (avg_lead_time * (std_dev_demand ** 2)) + (((avg_sale / expect_player) * lead_time_std_dev) ** 2)
-                )
+                if st.session_state["b2c_is_high_demand"] == "Yes":
+                    safety_stock = b2c_Z * math.sqrt(
+                        (avg_lead_time * (std_dev_demand ** 2)) + (((avg_sale) * lead_time_std_dev) ** 2)
+                    )
+                else:
+                    safety_stock = b2c_Z * std_dev_demand * math.sqrt(avg_lead_time) 
+
                 b2c_safety_stock_dict[(i, j)] = int(safety_stock)
                 b2c_reorder_point_dict[(i, j)] = int(safety_stock) + (avg_sale * avg_lead_time)
 
@@ -91,18 +97,31 @@ if b2b_file:
     b2b_safety_stock_dict = {}
     b2b_reorder_point_dict = {}
 
+    safety_stock_base = st.radio("Safety stock base",["Machine capacity","Wholesales demand"])
+    b2b_is_mass_production = st.radio("High demand?",["Yes","No"],key="b2b_is_mass_production")
+
     avg_lead_time = st.number_input(f"Average lead time (days) for warehouse", value=2, min_value=1)
     lead_time_std_dev = st.number_input(f"Lead time standard deviation for warehouse", value=1, min_value=1)
     
+    if safety_stock_base == "Machine capacity":
+        std_dev_demand = st.number_input("Machine capacity standard deviation",value=100)
     for i in b2b_result_t.index.unique():
-        avg_sale = b2b_result_t.loc[i, 'mean']
-        std_dev_demand = b2b_result_t.loc[i, 'std']
-        
-        safety_stock = b2b_Z * math.sqrt(
-            (avg_lead_time * (std_dev_demand ** 2)) + (((avg_sale) * lead_time_std_dev) ** 2)
-        )
+        if safety_stock_base == "Machine capacity":
+            st.subheader(f"Setting for {i}")
+            avg_require = st.number_input(f"Machine capacity for {i} per day",value=3000,min_value=0)
+
+        else:
+            avg_require = b2b_result_t.loc[i, 'mean']
+            std_dev_demand = b2b_result_t.loc[i, 'std']
+        if st.session_state["b2b_is_mass_production"] == "Yes":
+            safety_stock = b2b_Z * math.sqrt(
+                (avg_lead_time * (std_dev_demand ** 2)) + (((avg_require) * lead_time_std_dev) ** 2)
+            )
+        else:
+            safety_stock = b2b_Z * std_dev_demand * math.sqrt(avg_lead_time) 
+            
         b2b_safety_stock_dict[i] = int(safety_stock)
-        b2b_reorder_point_dict[i] = int(safety_stock) + (avg_sale * avg_lead_time)
+        b2b_reorder_point_dict[i] = int(safety_stock) + (avg_require * avg_lead_time)
 
     b2b_result_t['Safety Stock'] = b2b_result_t.index.map(b2b_safety_stock_dict.get)
     b2b_result_t['Reorder point'] = b2b_result_t.index.map(b2b_reorder_point_dict.get)
