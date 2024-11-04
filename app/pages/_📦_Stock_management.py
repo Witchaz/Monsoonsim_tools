@@ -5,7 +5,7 @@ import seaborn as sns
 import math
 
 st.set_page_config(
-    page_title="Safety stock",
+    page_title="Stock management",
     page_icon="📦",
 )
 
@@ -32,7 +32,10 @@ def b2b_highlight_by_product(row):
 b2c_file = st.file_uploader("B2C forecast", type="csv")
 if b2c_file:
     b2c_df = pd.read_csv(b2c_file)
-    b2c_df = b2c_df.drop(columns=["Category"])
+    try:
+        b2c_df = b2c_df.drop(columns=["Category"])
+    except Exception as e:
+        st.error("Error : Data is wrong format.")        
     new_columns = pd.MultiIndex.from_tuples(
         [col.split('-', 1) for col in b2c_df.columns], names=["City", "Product"]
     )
@@ -88,7 +91,11 @@ if b2c_file:
 b2b_file = st.file_uploader("B2B forecast", type="csv")
 if b2b_file:
     b2b_df = pd.read_csv(b2b_file)
-    b2b_df.drop(columns=["Day"], inplace=True)
+    try:
+        b2b_df.drop(columns=["Day"], inplace=True)
+    except Exception as e:
+        st.error("Error : Data is wrong format.")
+        print(e)
     b2b_result = b2b_df.agg(['mean', 'std'])
     b2b_result_t = b2b_result.T
     b2b_result_t = b2b_result_t.astype({'mean': 'int64', 'std': 'int64'})

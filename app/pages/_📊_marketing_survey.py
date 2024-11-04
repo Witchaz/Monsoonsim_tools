@@ -20,8 +20,11 @@ def cal():
     df = pd.read_csv(file)
     df.columns = df.columns.str.strip()
     
-
-    df['Age Group'] = pd.cut(df['Age'], bins=[0, 30, 60, float('inf')], labels=['30 and below', '30-60', 'Above 60'])
+    try:
+        df['Age Group'] = pd.cut(df['Age'], bins=[0, 30, 60, float('inf')], labels=['30 and below', '30-60', 'Above 60'])
+    except Exception as e:
+        st.error("Error : Data is wrong format.")
+        print(e)
     df = df.groupby(['Age Group','Product Preference'])['Media Preference'].value_counts().unstack(fill_value=0)
     df.reset_index(inplace=True)
     df = df.style.background_gradient(cmap="RdPu", subset=['Media A', 'Media B', 'Media C'])

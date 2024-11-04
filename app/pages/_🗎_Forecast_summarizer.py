@@ -6,7 +6,7 @@ import seaborn as sns
 
 st.set_page_config(
     page_title="Forecasting summarizer",
-    page_icon="📊",
+    page_icon="🗎",
 )
 st.sidebar.header("Forecasting summarizer")
 st.sidebar.markdown("ช่วยในการสรุปผลการทำนายความต้องการของลูกค้า")
@@ -32,9 +32,12 @@ def highlight_by_dynamic_product(row):
 b2c_file = st.file_uploader("B2C forecast",type="csv")
 if b2c_file :
     b2c_df = pd.read_csv(b2c_file)
-    # ลบคอลัมน์ 'Category' ออกเพราะไม่ได้ใช้ในการคำนวณ
-    b2c_df = b2c_df.drop(columns=["Category"])
-    
+
+    try:
+        b2c_df = b2c_df.drop(columns=["Category"])
+    except Exception as e:
+        st.error("Error : Data is wrong format.")
+        print(e)
     # แยกชื่อคอลัมน์เพื่อสร้าง MultiIndex โดยแบ่งเป็น 'City' และ 'Product'
     new_columns = pd.MultiIndex.from_tuples(
         [col.split('-', 1) for col in b2c_df.columns], names=["City", "Product"]
