@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd 
-import statistics 
+
 st.set_page_config(
     page_title="Forecasting summarizer",
     page_icon="📊",
