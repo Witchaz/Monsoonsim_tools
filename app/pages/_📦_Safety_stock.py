@@ -10,12 +10,12 @@ st.sidebar.markdown("")
 
 Z = st.number_input("Z",value=1.96)
 average_lead_time = st.number_input("Average lead time",value=2)
-lead_time_std_dev = st.number_input("Lead time standard deviation",value=1)
+lead_time_std_dev = st.number_input("Lead time standard deviation (ถ้าไม่รู้ให้ใส่ 0 สมมุติว่ามาส่งตามค่าเฉลี่ย)",value=1)
 average_sale = st.number_input("Adverage sale per day",value=1000)
-std_dev_demand = st.number_input("sales per day Standard deviation",value=100)
+std_dev_demand = st.number_input("sales per day Standard deviation (ถ้าไม่รู้ให้ใส่ 0 สมมุติว่าขายได้เท่าค่าเฉลี่ย)",value=100)
 
 # คำนวณตามสูตร
-result = Z * math.sqrt((average_lead_time * (std_dev_demand ** 2)) + (average_sale * (lead_time_std_dev ** 2)))
+result = Z * math.sqrt((average_lead_time * (std_dev_demand ** 2)) + ((average_sale * lead_time_std_dev ) ** 2))
 
 st.markdown(f'''
             ***
