@@ -1,6 +1,9 @@
+import matplotlib
 import streamlit as st
 import pandas as pd
+import seaborn as sns
 import math
+
 
 st.set_page_config(
     page_title="Safety stock",
@@ -8,6 +11,23 @@ st.set_page_config(
 )
 
 
+def fade_color(color, alpha=0.3):
+    r, g, b = color  # ค่า RGB ของสีต้นฉบับ
+    # ผสมกับสีขาว (1,1,1) เพื่อให้สีจางลง
+    faded_color = [(1 - alpha) * r + alpha, (1 - alpha) * g + alpha, (1 - alpha) * b + alpha]
+    return matplotlib.colors.to_hex(faded_color)
+
+def highlight_by_dynamic_city(row):
+    city = row.name[0]  # ดึงชื่อเมืองจาก MultiIndex
+    color = city_colors.get(city, "#ffffff")  # ใช้สีที่จัดไว้ตามลำดับ
+    faded_color = fade_color(color, alpha=0.3)  # ทำให้สีจางลงด้วย alpha
+    return [f'background-color: {faded_color}'] * len(row)
+
+def highlight_by_dynamic_product(row):
+    product = row.name
+    color = product_colors.get(product, "#ffffff")
+    faded_color = fade_color(color, alpha=0.3)
+    return [f'background-color: {faded_color}'] * len(row)
 
 b2c_file = st.file_uploader("B2C forecast",type="csv")
 if b2c_file :
@@ -28,8 +48,7 @@ if b2c_file :
         result_t=  result_t.astype({'mean':'int64','std':'int64'})
         
         Z = st.number_input("Z-score (e.g., 1.65 for 95% confidence level)", value=1.65)
-        safety_stock_values = []  # เก็บค่าที่คำนวณได้สำหรับแต่ละเมืองและผลิตภัณฑ์
-
+        
         # เตรียม dictionary เพื่อเก็บค่า Safety Stock ที่คำนวณ
         safety_stock_dict = {}
 
@@ -50,7 +69,13 @@ if b2c_file :
                 safety_stock_dict[(i, j)] = int(safety_stock)
 
         result_t['Safety Stock'] = result_t.index.map(safety_stock_dict.get)
-
+        
+        # สร้างชุดสีโดยใช้ seaborn หรือชุดสีอื่น ๆ
+        colors = sns.color_palette("muted", len(new_columns.get_level_values(0).unique()))
+        city_colors = {city: colors[i] for i, city in enumerate(new_columns.get_level_values(0).drop_duplicates(keep='first'))}
+        
+        
+        result_t = result_t.style.apply(highlight_by_dynamic_city, axis=1)
         st.dataframe(result_t,
             use_container_width= True)
 
@@ -67,7 +92,13 @@ if b2b_file:
     result = b2b_df.agg(['mean','std'])
     result_t = result.T
     result_t = result_t.astype({'mean':'int64','std':'int64'})
-    st.dataframe(result_t,use_container_width=True)
+    
+    avg_lead_time = st.number_input(f"Average lead time (days) for {i}", value=2, min_value=1)
+    lead_time_std_dev = st.number_input(f"Lead time standard deviation for {i}", value=1,min_value=1)        
+    # สร้างชุดสีโดยใช้ seaborn หรือชุดสีอื่น ๆ
+    colors = sns.color_palette("muted", len(result_t.index.unique()))
+    product_colors = {product: colors[i] for i, product in enumerate(result_t.index.unique())}
+    
+    result_t = result_t.style.apply(highlight_by_dynamic_product, axis=1)
 
-    avg_lead_time = st.number_input(f"Average lead time (days) for {i}", value=2, key=f"average_lead_time_{i}",min_value=1)
-    lead_time_std_dev = st.number_input(f"Lead time standard deviation for {i}", value=1, key=f"lead_time_std_dev_{i}",min_value=1)
+    st.dataframe(result_t,use_container_width=True)
