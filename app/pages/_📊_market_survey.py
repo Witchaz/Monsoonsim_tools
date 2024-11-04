@@ -7,10 +7,10 @@ import numpy as np
 
 def cal():
     if in1 == None or in1 == "" or isinstance(in1,str):
-        st.error("Please enter a valid number for Group 1 max age.")
+        st.error("Please enter a valid number for Junior max age.")
         return
     elif in2 == None or in2 == "" or isinstance(in1,str):
-        st.error("Please enter a valid number for Group 3 min age.")
+        st.error("Please enter a valid number for elder min age.")
         return
     elif file == None:
         st.error("Please upload a marketing survey (.csv) file.")
@@ -21,7 +21,7 @@ def cal():
     df.columns = df.columns.str.strip()
     
     try:
-        df['Age Group'] = pd.cut(df['Age'], bins=[0, 30, 60, float('inf')], labels=['30 and below', '30-60', 'Above 60'])
+        df['Age Group'] = pd.cut(df['Age'], bins=[0, in1, in2, float('inf')], labels=[f'{in1} and below', f'{in1}-{in2}', f'Above {in2}'])
     except Exception as e:
         st.error("Error : Data is wrong format.")
         print(e)
@@ -39,8 +39,8 @@ st.set_page_config(
 st.sidebar.header("Marketing survey summarizer")
 st.sidebar.markdown("เว็บที่จะช่วยสรุปข้อมูลใน Marketing survey ให้คุณ โดยในนี้จะใช้ระบบ 100 samples ถ้าใช้เป็นตัวอื่นค่าที่จะช่วยไฮไลต์อาจจะเพี้ยน")
 
-in1 = st.number_input("อายุสูงสุดของกลุ่มลูกค้าเด็ก",value=25)
-in2 = st.number_input("อายุต่ำสุดของกลุ่มลูกค้าผู้สูงอายุ",value=60)
+in1 = st.number_input("อายุสูงสุดของกลุ่มลูกค้าเด็ก",value=25,min_value=1)
+in2 = st.number_input("อายุต่ำสุดของกลุ่มลูกค้าผู้สูงอายุ",value=60,min_value=in1+1)
 file = st.file_uploader("Market Survey (.csv)",type="csv")
 
 if st.button("submit"):
