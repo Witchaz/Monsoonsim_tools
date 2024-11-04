@@ -92,10 +92,23 @@ if b2b_file:
     result = b2b_df.agg(['mean','std'])
     result_t = result.T
     result_t = result_t.astype({'mean':'int64','std':'int64'})
-    
-    avg_lead_time = st.number_input(f"Average lead time (days) for {i}", value=2, min_value=1)
-    lead_time_std_dev = st.number_input(f"Lead time standard deviation for {i}", value=1,min_value=1)        
-    # สร้างชุดสีโดยใช้ seaborn หรือชุดสีอื่น ๆ
+    Z = st.number_input("Z-score (e.g., 1.65 for 95% confidence level)", value=1.65)
+    safety_stock_dict = {}
+    for i in result_t.index.unique():
+        st.subheader(f"Settings for {i}")  
+        
+        avg_lead_time = st.number_input(f"Average lead time (days) for {i}", value=2, min_value=1)
+        lead_time_std_dev = st.number_input(f"Lead time standard deviation for {i}", value=1,min_value=1)        
+        avg_sale = result_t.loc[(i), 'mean']
+        std_dev_demand = result_t.loc[(i), 'std']
+        
+        safety_stock = Z * math.sqrt(
+            (avg_lead_time * (std_dev_demand ** 2)) + (((avg_sale) * lead_time_std_dev) ** 2)
+        )
+        safety_stock_dict[(i)] = int(safety_stock)
+
+    result_t['Safety Stock'] = result_t.index.map(safety_stock_dict.get)
+
     colors = sns.color_palette("muted", len(result_t.index.unique()))
     product_colors = {product: colors[i] for i, product in enumerate(result_t.index.unique())}
     
