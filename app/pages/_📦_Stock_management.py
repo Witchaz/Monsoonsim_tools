@@ -44,6 +44,8 @@ def b2c_handle(b2c_file):
         b2c_Z = st.number_input("B2C Z-score (e.g., 1.65 for 95% confidence level)", value=1.65)
         b2c_safety_stock_dict = {}
         b2c_reorder_point_dict = {}
+        b2c_sales_potential_dict = {}
+        b2c_area_for_safety_stock_dict = {}
 
         st.subheader(f"Default Settings")
         avg_lead_time = st.number_input(f"Default average lead time (days)", value=2, key=f"b2c_average_lead_time_Default", min_value=1)
@@ -69,7 +71,7 @@ def b2c_handle(b2c_file):
             for j in new_columns.get_level_values(1).drop_duplicates(keep="first"):
                 avg_sale = b2c_result_t.loc[(i, j), 'mean'] / expect_player
                 std_dev_demand = b2c_result_t.loc[(i, j), 'std'] /expect_player
-                
+
                 if st.session_state["b2c_is_high_demand"] == "Yes":
                     safety_stock = b2c_Z * math.sqrt(
                         (avg_lead_time * (std_dev_demand ** 2)) + ((avg_sale  * lead_time_std_dev) ** 2) 
@@ -77,12 +79,17 @@ def b2c_handle(b2c_file):
                 else:
                     safety_stock = b2c_Z * std_dev_demand * math.sqrt(avg_lead_time) 
 
-                b2c_safety_stock_dict[(i, j)] = int(safety_stock)
-                b2c_reorder_point_dict[(i, j)] = int(int(safety_stock) + (avg_sale * avg_lead_time))
+                b2c_safety_stock_dict[(i, j)] = f"{int(safety_stock)}"
+                b2c_reorder_point_dict[(i, j)] = f"{int(int(safety_stock) + (avg_sale * avg_lead_time))}"
+                b2c_sales_potential_dict[(i, j)] = f"{int(avg_sale)}"
+                b2c_area_for_safety_stock_dict[(i, j)] = f"{st.session_state[f"size_{j}"] * int(safety_stock):.2f}"
 
+        b2c_result_t['Sales potential'] = b2c_result_t.index.map(b2c_sales_potential_dict.get)
         b2c_result_t['Safety Stock'] = b2c_result_t.index.map(b2c_safety_stock_dict.get)
         b2c_result_t['Reorder Point'] = b2c_result_t.index.map(b2c_reorder_point_dict.get)
+        b2c_result_t['Area for safety stock'] = b2c_result_t.index.map(b2c_area_for_safety_stock_dict.get)
         
+
         b2c_colors = sns.color_palette("muted", len(new_columns.get_level_values(0).unique()))
         b2c_city_colors = {city: b2c_colors[i] for i, city in enumerate(new_columns.get_level_values(0).drop_duplicates(keep='first'))}
         
