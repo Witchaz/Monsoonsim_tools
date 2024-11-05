@@ -84,5 +84,5 @@ if b2c_file:
     b2c_handle(b2c_file)
 
 b2b_file = st.file_uploader("B2B forecast",type="csv")
-if b2c_file:
+if b2b_file:
     b2b_handle(b2b_file)
