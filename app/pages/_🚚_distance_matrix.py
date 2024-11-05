@@ -57,6 +57,7 @@ st.set_page_config(
 st.sidebar.header("Distance Matrix")
 st.sidebar.markdown("Visualize the distances between each pair of nodes")
 
+st.header("Distance matrix")
 distance_file = st.file_uploader("Retail Distance (.csv)", type="csv")
 b2b_file = st.file_uploader("B2B distance (.csv)",type="csv")
 if distance_file and b2b_file:

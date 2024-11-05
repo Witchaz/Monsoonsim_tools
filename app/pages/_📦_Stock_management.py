@@ -31,8 +31,6 @@ def b2c_handle(b2c_file):
     b2c_city_options = new_columns.get_level_values(0).drop_duplicates(keep='first')
     b2c_options = st.multiselect("Please select city", b2c_city_options, default=b2c_city_options[0])
 
-    st.radio("High demand?",["Yes","No"],key="b2c_is_high_demand")
-
     try:
         b2c_result = b2c_df[b2c_options].agg(['mean', 'std'])
         b2c_result_t = b2c_result.T
@@ -42,11 +40,26 @@ def b2c_handle(b2c_file):
         b2c_safety_stock_dict = {}
         b2c_reorder_point_dict = {}
 
+        st.subheader(f"Default Settings")
+        avg_lead_time = st.number_input(f"Default average lead time (days)", value=2, key=f"b2c_average_lead_time_Default", min_value=1)
+        lead_time_std_dev = st.number_input(f"Default lead time standard deviation", value=1, key=f"b2c_lead_time_std_dev_Default", min_value=1)
+        expect_player = st.number_input(f"Default expect player in market", value=1, key=f"b2c_expect_player_Default", min_value=1)
+
+        st.radio("High demand?",["Yes","No"],key="b2c_is_high_demand",horizontal=True)
+        
+
         for i in b2c_options:
             st.subheader(f"Settings for {i}")
-            avg_lead_time = st.number_input(f"Average lead time (days) for {i}", value=2, key=f"b2c_average_lead_time_{i}", min_value=1)
-            lead_time_std_dev = st.number_input(f"Lead time standard deviation for {i}", value=1, key=f"b2c_lead_time_std_dev_{i}", min_value=1)
-            expect_player = st.number_input(f"Expect player in market for {i}", value=1, key=f"b2c_expect_player_{i}", min_value=1)
+            st.radio("Use default option",["Yes","No"],key=f"b2c_use_default_{i}",horizontal=True)
+            
+            if st.session_state[f"b2c_use_default_{i}"] == "Yes":
+                avg_lead_time = st.session_state[f"b2c_average_lead_time_Default"]
+                lead_time_std_dev = st.session_state[f"b2c_lead_time_std_dev_Default"]
+                expect_player = st.session_state[f"b2c_expect_player_Default"]
+            else:    
+                avg_lead_time = st.number_input(f"Average lead time (days) for {i}", value=2, key=f"b2c_average_lead_time_{i}", min_value=1)
+                lead_time_std_dev = st.number_input(f"Lead time standard deviation for {i}", value=1, key=f"b2c_lead_time_std_dev_{i}", min_value=1)
+                expect_player = st.number_input(f"Expect player in market for {i}", value=1, key=f"b2c_expect_player_{i}", min_value=1)
 
             for j in new_columns.get_level_values(1).drop_duplicates(keep="first"):
                 avg_sale = b2c_result_t.loc[(i, j), 'mean']
@@ -54,7 +67,7 @@ def b2c_handle(b2c_file):
                 
                 if st.session_state["b2c_is_high_demand"] == "Yes":
                     safety_stock = b2c_Z * math.sqrt(
-                        (avg_lead_time * (std_dev_demand ** 2)) + (((avg_sale) * lead_time_std_dev) ** 2)
+                        (avg_lead_time * (std_dev_demand ** 2)) + (((avg_sale / expect_player) * lead_time_std_dev) ** 2)
                     )
                 else:
                     safety_stock = b2c_Z * std_dev_demand * math.sqrt(avg_lead_time) 
@@ -100,7 +113,7 @@ def b2b_handle(b2b_file):
     b2b_reorder_point_dict = {}
 
     safety_stock_base = st.radio("Safety stock base",["Machine capacity","Wholesales demand"])
-    b2b_is_mass_production = st.radio("High demand?",["Yes","No"],key="b2b_is_mass_production")
+    st.radio("High demand?",["Yes","No"],key="b2b_is_mass_production")
 
     avg_lead_time = st.number_input(f"Average lead time (days) for warehouse", value=2, min_value=1)
     lead_time_std_dev = st.number_input(f"Lead time standard deviation for warehouse", value=1, min_value=1)
@@ -143,12 +156,13 @@ st.sidebar.header("Stock management")
 st.sidebar.markdown("ช่วยคำนวณ Safety stock ทั้งในรูปแบบ Simple และ King's method นอกจากนี้ยังช่วยคำนวณ Reorder point ให้อีกด้วย")
 
 
+st.header("B2C stock management")
 # B2C Processing
 b2c_file = st.file_uploader("B2C forecast", type="csv")
 if b2c_file:
     b2c_handle(b2c_file)
 
-
+st.header("B2B stock management")
 # B2B Processing
 b2b_file = st.file_uploader("B2B forecast", type="csv")
 if b2b_file:

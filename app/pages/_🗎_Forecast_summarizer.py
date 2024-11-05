@@ -79,10 +79,12 @@ st.sidebar.header("Forecasting summarizer")
 st.sidebar.markdown("ช่วยในการสรุปผลการทำนายความต้องการของลูกค้า")
 
 
+st.header("B2C Forecasting Summary")
 b2c_file = st.file_uploader("B2C forecast",type="csv")
 if b2c_file:
     b2c_handle(b2c_file)
 
+st.header("B2B Forecasting summary")
 b2b_file = st.file_uploader("B2B forecast",type="csv")
 if b2b_file:
     b2b_handle(b2b_file)

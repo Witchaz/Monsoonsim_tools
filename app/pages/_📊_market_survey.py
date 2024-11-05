@@ -39,6 +39,8 @@ st.set_page_config(
 st.sidebar.header("Marketing survey summarizer")
 st.sidebar.markdown("เว็บที่จะช่วยสรุปข้อมูลใน Marketing survey ให้คุณ โดยในนี้จะใช้ระบบ 100 samples ถ้าใช้เป็นตัวอื่นค่าที่จะช่วยไฮไลต์อาจจะเพี้ยน")
 
+st.header("Market survey")
+
 in1 = st.number_input("อายุสูงสุดของกลุ่มลูกค้าเด็ก",value=25,min_value=1)
 in2 = st.number_input("อายุต่ำสุดของกลุ่มลูกค้าผู้สูงอายุ",value=60,min_value=in1+1)
 file = st.file_uploader("Market Survey (.csv)",type="csv")
