@@ -34,7 +34,7 @@ def b2c_handle(b2c_df):
     try:
         result = b2c_df[options].agg(['mean', 'max', 'min','std'])
         result_t = result.T
-        result_t=  result_t.astype({'mean':'int64','std':'int64'})
+        result_t = result_t.astype({'mean':'int64','std':'int64','max':'int64','min':'int64'})
 
         # สร้างชุดสีโดยใช้ seaborn หรือชุดสีอื่น ๆ
         colors = sns.color_palette("muted", len(new_columns.get_level_values(0).unique()))
@@ -61,7 +61,7 @@ def b2b_handle(b2b_df):
     b2b_df.drop(columns=["Day"],inplace=True)
     result = b2b_df.agg(['mean','max','min','std'])
     result_t = result.T
-    result_t = result_t.astype({'mean':'int64','std':'int64'})
+    result_t = result_t.astype({'mean':'int64','std':'int64','max':'int64','min':'int64'})
     
     # สร้างชุดสีโดยใช้ seaborn หรือชุดสีอื่น ๆ
     colors = sns.color_palette("muted", len(result_t.index.unique()))
