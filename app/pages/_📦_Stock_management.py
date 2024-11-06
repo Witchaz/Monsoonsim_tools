@@ -123,7 +123,13 @@ def b2b_handle(b2b_file):
     b2b_Z = st.number_input("B2B Z-score (e.g., 1.65 for 95% confidence level)", value=1.65)
     b2b_safety_stock_dict = {}
     b2b_reorder_point_dict = {}
-
+    b2b_area_for_safety_stock_dict = {}
+    
+    product_list = list(b2b_result_t.index.unique())
+    
+    for i in product_list:
+        st.number_input(f"{i} dimentsion : ",key=f"size_{i}",format="%0.5f",value=0.005)
+    
     safety_stock_base = st.radio("Safety stock base",["Machine capacity","Wholesales demand"])
     st.radio("High demand?",["Yes","No"],key="b2b_is_mass_production")
 
@@ -149,9 +155,11 @@ def b2b_handle(b2b_file):
             
         b2b_safety_stock_dict[i] = int(safety_stock)
         b2b_reorder_point_dict[i] = int(safety_stock) + (avg_require * avg_lead_time)
+        b2b_area_for_safety_stock_dict[i] = f"{st.session_state[f"size_{i}"] * int(safety_stock):.2f}"
 
     b2b_result_t['Safety Stock'] = b2b_result_t.index.map(b2b_safety_stock_dict.get)
     b2b_result_t['Reorder point'] = b2b_result_t.index.map(b2b_reorder_point_dict.get)
+    b2b_result_t['Area for safety stock'] = b2b_result_t.index.map(b2b_area_for_safety_stock_dict.get)
 
     b2b_colors = sns.color_palette("muted", len(b2b_result_t.index.unique()))
     b2b_product_colors = {product: b2b_colors[i] for i, product in enumerate(b2b_result_t.index.unique())}
