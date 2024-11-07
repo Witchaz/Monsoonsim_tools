@@ -128,7 +128,7 @@ def b2b_handle(b2b_file):
     product_list = list(b2b_result_t.index.unique())
     
     for i in product_list:
-        st.number_input(f"{i} dimentsion : ",key=f"size_{i}",format="%0.5f",value=0.005)
+        st.number_input(f"{i} dimentsion : ",key=f"b2b_size_{i}",format="%0.5f",value=0.005)
     
     safety_stock_base = st.radio("Safety stock base",["Machine capacity","Wholesales demand"])
     st.radio("High demand?",["Yes","No"],key="b2b_is_mass_production")
@@ -155,7 +155,7 @@ def b2b_handle(b2b_file):
             
         b2b_safety_stock_dict[i] = int(safety_stock)
         b2b_reorder_point_dict[i] = int(safety_stock) + (avg_require * avg_lead_time)
-        b2b_area_for_safety_stock_dict[i] = f"{st.session_state[f"size_{i}"] * int(safety_stock):.2f}"
+        b2b_area_for_safety_stock_dict[i] = f"{st.session_state[f"b2b_size_{i}"] * int(safety_stock):.2f}"
 
     b2b_result_t['Safety Stock'] = b2b_result_t.index.map(b2b_safety_stock_dict.get)
     b2b_result_t['Reorder point'] = b2b_result_t.index.map(b2b_reorder_point_dict.get)
