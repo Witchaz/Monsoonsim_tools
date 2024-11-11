@@ -75,7 +75,7 @@ st.set_page_config(
     page_title="Forecasting summarizer",
     page_icon="🗎",
 )
-st.sidebar.header("Forecasting summarizer")
+st.sidebar.title("Forecasting summarizer")
 st.sidebar.markdown("ช่วยในการสรุปผลการทำนายความต้องการของลูกค้า")
 
 

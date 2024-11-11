@@ -172,7 +172,7 @@ st.set_page_config(
     page_title="Stock management",
     page_icon="📦",
 )
-st.sidebar.header("Stock management")
+st.sidebar.title("Stock management")
 st.sidebar.markdown("ช่วยคำนวณ Safety stock ทั้งในรูปแบบ Simple และ King's method นอกจากนี้ยังช่วยคำนวณ Reorder point ให้อีกด้วย")
 
 

@@ -54,7 +54,7 @@ st.set_page_config(
     page_icon="🚚",
 )
 
-st.sidebar.header("Distance Matrix")
+st.sidebar.title("Distance Matrix")
 st.sidebar.markdown("Visualize the distances between each pair of nodes")
 
 st.header("Distance matrix")
